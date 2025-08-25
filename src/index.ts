@@ -9,6 +9,7 @@ import { logger } from "./config/logger";
 import { authRouter } from "./modules/auth/router";
 import { areasRouter } from "./modules/areas/router";
 import { collaboratorsRouter } from "./modules/collaborators/router";
+import { projectsRouter } from "./modules/projects/router";
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(express.json({ limit: "1mb" }));
 app.use("/auth", authRouter);
 app.use("/areas", areasRouter);
 app.use("/collaborators", collaboratorsRouter);
+app.use("/projects", projectsRouter);
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", uptime: process.uptime() });
