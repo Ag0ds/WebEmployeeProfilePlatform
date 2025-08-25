@@ -23,6 +23,7 @@ app.use("/areas", areasRouter);
 app.use("/collaborators", collaboratorsRouter);
 app.use("/projects", projectsRouter);
 
+
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", uptime: process.uptime() });
 });
