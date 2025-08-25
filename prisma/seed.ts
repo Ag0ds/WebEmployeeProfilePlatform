@@ -1,11 +1,9 @@
-// prisma/seed.ts
 import { PrismaClient, AreaName, Role } from "../src/generated/prisma";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // 1) áreas padrão
   const areas: AreaName[] = [
     AreaName.FRONTEND,
     AreaName.BACKEND,
@@ -22,7 +20,6 @@ async function main() {
     });
   }
 
-  // 2) gestor inicial
   const passwordHash = await bcrypt.hash("admin123", 10);
   const gestor = await prisma.collaborator.upsert({
     where: { email: "gestor@empresa.com" },
@@ -35,7 +32,6 @@ async function main() {
     },
   });
 
-  // 3) vincular gestor à área de GESTAO
   const gestao = await prisma.area.findUnique({ where: { name: AreaName.GESTAO } });
   if (gestao) {
     await prisma.collaboratorArea.upsert({
