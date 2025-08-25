@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Collaborator {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  passwordHash  String
+  age           Int?
+  regime        String?
+  role          Role     @default(NORMAL) // NORMAL | GESTOR
+  areas         CollaboratorArea[]
+  projects      ProjectMember[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Area {
+  id    String  @id @default(cuid())
+  name  AreaName @unique
+  users CollaboratorArea[]
+}
+
+model CollaboratorArea {
+  collaboratorId String
+  areaId         String
+  collaborator   Collaborator @relation(fields: [collaboratorId], references: [id])
+  area           Area         @relation(fields: [areaId], references: [id])
+
+  @@id([collaboratorId, areaId])
+}
+
+model Project {
+  id           String          @id @default(cuid())
+  name         String
+  deadline     DateTime?
+  description  String?
+  technologies String[]        // string[]
+  members      ProjectMember[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model ProjectMember {
+  collaboratorId String
+  projectId      String
+  collaborator   Collaborator @relation(fields: [collaboratorId], references: [id])
+  project        Project      @relation(fields: [projectId], references: [id])
+
+  @@id([collaboratorId, projectId])
+}
+
+enum Role {
+  NORMAL
+  GESTOR
+}
+
+enum AreaName {
+  FRONTEND
+  BACKEND
+  INFRA
+  DESIGN
+  REQUISITOS
+  GESTAO
+}
