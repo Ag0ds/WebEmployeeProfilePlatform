@@ -12,6 +12,7 @@ import { collaboratorsRouter } from "./modules/collaborators/router";
 import { projectsRouter } from "./modules/projects/router";
 
 const app = express();
+const origins = env.CORS_ORIGIN.split(",").map(s => s.trim());
 
 app.use(pinoHttp({ logger }));
 app.use(helmet());
@@ -22,18 +23,26 @@ app.use("/auth", authRouter);
 app.use("/areas", areasRouter);
 app.use("/collaborators", collaboratorsRouter);
 app.use("/projects", projectsRouter);
+app.use(cors({ origin: origins.includes("*") ? true : origins }));
 
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", uptime: process.uptime() });
 });
 
-
-app.use((err: any, _req: any, res: any, _next: any) => {
-  logger.error(err);
-  res.status(err?.statusCode || 500).json({ message: err?.message || "Internal Server Error" });
-});
-
 app.listen(env.PORT, () => {
   logger.info({ port: env.PORT }, "API up");
+});
+
+app.use((err: any, _req: any, res: any, _next: any) => {
+  const status = err?.statusCode ?? 500;
+  const body = {
+    message: err?.message ?? "Internal Server Error",
+    code: err?.code,
+    details: err?.details,
+  };
+  if (process.env.NODE_ENV === "development" && status >= 500) {
+    (body as any).stack = err?.stack;
+  }
+  res.status(status).json(body);
 });

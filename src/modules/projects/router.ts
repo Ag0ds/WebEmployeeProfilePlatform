@@ -10,13 +10,14 @@ import {
   MemberRemoveSchema,
 } from "./schemas";
 import { projectsService } from "./service";
+import { ListProjectsSchema } from "./schemas";
 
 export const projectsRouter = Router();
 
-// GETs: públicos (se quiser, aplique auth)
-projectsRouter.get("/", async (_req, res, next) => {
+projectsRouter.get("/", validate(ListProjectsSchema), async (req, res, next) => {
   try {
-    const items = await projectsService.list();
+    const { page, perPage, q } = req.query as any;
+    const items = await projectsService.list({ page, perPage, q });
     res.json(items);
   } catch (err) { next(err); }
 });

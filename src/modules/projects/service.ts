@@ -7,10 +7,18 @@ function hasMinComposition(areaNames: string[]) {
 }
 
 export const projectsService = {
-  async list() {
-    const items = await projectsRepository.listAll();
-    return serializeManyProjects(items as any);
-  },
+  async list(input?: { page: number; perPage: number; q?: string }) {
+  const page = input?.page ?? 1;
+  const perPage = input?.perPage ?? 10;
+  const { total, rows } = await projectsRepository.listPaged(page, perPage, input?.q);
+  return {
+    items: serializeManyProjects(rows as any),
+    page,
+    perPage,
+    total,
+    totalPages: Math.ceil(total / perPage),
+  };
+},
 
   async get(id: string) {
     const p = await projectsRepository.findById(id);

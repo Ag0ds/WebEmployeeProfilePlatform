@@ -7,10 +7,17 @@ type Role = "NORMAL" | "GESTOR";
 type AreaName = "FRONTEND"|"BACKEND"|"INFRA"|"DESIGN"|"REQUISITOS"|"GESTAO";
 
 export const collaboratorsService = {
-  async list(viewerRole: Role) {
-    const data = await collaboratorsRepository.listAll();
-    return serializeManyFor(viewerRole, data as any);
-  },
+  async list(viewerRole: "NORMAL" | "GESTOR", input: { page: number; perPage: number; q?: string }) {
+  const { total, rows } = await collaboratorsRepository.listPaged(input.page, input.perPage, input.q);
+  const items = serializeManyFor(viewerRole, rows as any);
+  return {
+    items,
+    page: input.page,
+    perPage: input.perPage,
+    total,
+    totalPages: Math.ceil(total / input.perPage),
+  };
+},
 
   async get(viewerRole: Role, id: string) {
     const c = await collaboratorsRepository.findById(id);

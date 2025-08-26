@@ -32,3 +32,11 @@ export const MemberAddSchema = z.object({
 export const MemberRemoveSchema = z.object({
   params: z.object({ id: z.string().min(1), collaboratorId: z.string().min(1) }),
 });
+
+export const ListProjectsSchema = z.object({
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    perPage: z.coerce.number().int().min(1).max(100).default(10),
+    q: z.string().trim().min(1).optional(), // busca por name
+  }),
+});

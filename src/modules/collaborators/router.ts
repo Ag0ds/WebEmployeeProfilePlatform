@@ -8,13 +8,14 @@ import {
   IdParamSchema,
 } from "./schemas";
 import { collaboratorsService } from "./service";
+import { ListCollaboratorsSchema } from "./schemas";
 
 export const collaboratorsRouter = Router();
 
-collaboratorsRouter.get("/", auth, async (req, res, next) => {
+collaboratorsRouter.get("/", auth, validate(ListCollaboratorsSchema), async (req, res, next) => {
   try {
-    const viewerRole = req.user!.role;
-    const data = await collaboratorsService.list(viewerRole);
+    const { page, perPage, q } = req.query as any;
+    const data = await collaboratorsService.list(req.user!.role, { page, perPage, q });
     res.json(data);
   } catch (err) { next(err); }
 });
