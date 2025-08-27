@@ -32,12 +32,12 @@ export default function ProjectDetailPage() {
   const router = useRouter();
   const [newMember, setNewMember] = useState("");
 
-  const projectQ = useQuery({
+  const projectQ = useQuery<Project, Error>({
     queryKey: ["project", id],
     queryFn: async () => (await api.get(`/projects/${id}`)).data as Project,
   });
 
-  const collabsQ = useQuery({
+  const collabsQ = useQuery<{ id: string; name: string }[], Error>({
     queryKey: ["collaborators-mini"],
     queryFn: async () => {
       const { data } = await api.get("/collaborators", { params: { page: 1, perPage: 100 } });
@@ -114,107 +114,174 @@ export default function ProjectDetailPage() {
   };
 
   return (
-    <Guard>
-      <main className="max-w-3xl mx-auto p-6 space-y-6">
-        {projectQ.isLoading && <p>Carregando...</p>}
-        {projectQ.isError && <p>Erro ao carregar projeto.</p>}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      <Guard>
+        <main className="max-w-3xl mx-auto p-6 space-y-6">
+          {projectQ.isLoading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+              <p className="ml-3 text-gray-300">Carregando...</p>
+            </div>
+          )}
+          {projectQ.isError && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+              <p className="text-red-400">Erro ao carregar projeto.</p>
+            </div>
+          )}
 
-        {projectQ.data && (
-          <>
-            {/* Cabeçalho */}
-            <header className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-semibold">{projectQ.data.name}</h1>
-                <StatusBadge s={projectQ.data.status} />
-              </div>
-              <RequireGestor>
-                <div className="flex items-center gap-3">
-                  {projectQ.data.status === "ACTIVE" ? (
-                    <>
-                      <button className="underline" onClick={complete}>Concluir</button>
-                      <button className="underline" onClick={cancel}>Cancelar</button>
-                    </>
-                  ) : (
-                    <button className="underline" onClick={reopen}>Reabrir</button>
-                  )}
-                  <Link href={`/projects/${id}/edit`} className="underline">Editar</Link>
-                  <button className="text-red-600 underline" onClick={deleteProject}>Excluir</button>
+          {projectQ.data && (
+            <>
+              <header className="flex items-center justify-between bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
+                <div className="flex items-center gap-4">
+                  <h1 className="text-2xl font-semibold text-white">{projectQ.data.name}</h1>
+                  <StatusBadge s={projectQ.data.status} />
                 </div>
-              </RequireGestor>
-            </header>
-
-            {/* Metadados */}
-            <section className="space-y-1 text-sm text-gray-700">
-              <div>
-                <span className="font-medium">Deadline:</span> {projectQ.data.deadline ?? "-"}
-              </div>
-              {projectQ.data.description && (
-                <div>
-                  <span className="font-medium">Descrição:</span> {projectQ.data.description}
-                </div>
-              )}
-              <div>
-                <span className="font-medium">Tecnologias:</span>{" "}
-                {projectQ.data.technologies?.length ? projectQ.data.technologies.join(", ") : "-"}
-              </div>
-              {projectQ.data.status !== "ACTIVE" && projectQ.data.completedAt && (
-                <div className="text-xs text-gray-500">
-                  Atualizado: {new Date(projectQ.data.completedAt).toLocaleString()}
-                </div>
-              )}
-            </section>
-
-            {/* Membros */}
-            <section className="space-y-3">
-              <h2 className="text-lg font-medium">Membros</h2>
-              {projectQ.data.members?.length ? (
-                <ul className="list-disc pl-6 space-y-1">
-                  {projectQ.data.members.map((m) => (
-                    <li key={m.id}>
-                      {m.name} — {m.role} ({m.areas.join(", ")})
-                      <RequireGestor>
-                        <button className="text-red-600 underline ml-2" onClick={() => removeMember(m.id)}>
-                          remover
+                <RequireGestor>
+                  <div className="flex items-center gap-3">
+                    {projectQ.data.status === "ACTIVE" ? (
+                      <>
+                        <button
+                          className="text-emerald-400 hover:text-emerald-300 underline transition-colors duration-200"
+                          onClick={complete}
+                        >
+                          Concluir
                         </button>
-                      </RequireGestor>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-600">Sem membros.</p>
-              )}
-
-              {/* Adicionar membro (somente gestor) */}
-              <RequireGestor>
-                <div className="border p-3 rounded-md space-y-2">
-                  <div className="font-medium">Adicionar membro</div>
-                  <div className="flex gap-2">
-                    <select
-                      className="border p-2"
-                      value={newMember}
-                      onChange={(e) => setNewMember(e.target.value)}
-                      disabled={collabsQ.isLoading}
+                        <button
+                          className="text-yellow-400 hover:text-yellow-300 underline transition-colors duration-200"
+                          onClick={cancel}
+                        >
+                          Cancelar
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        className="text-blue-400 hover:text-blue-300 underline transition-colors duration-200"
+                        onClick={reopen}
+                      >
+                        Reabrir
+                      </button>
+                    )}
+                    <Link
+                      href={`/projects/${id}/edit`}
+                      className="text-blue-400 hover:text-blue-300 underline transition-colors duration-200"
                     >
-                      <option value="">-- selecione --</option>
-                      {collabsQ.data?.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                    <button className="border px-3" onClick={addMember}>
-                      Adicionar
+                      Editar
+                    </Link>
+                    <button
+                      className="text-red-400 hover:text-red-300 underline transition-colors duration-200"
+                      onClick={deleteProject}
+                    >
+                      Excluir
                     </button>
                   </div>
-                  {collabsQ.isError && (
-                    <p className="text-sm text-red-600">Erro ao carregar lista de colaboradores.</p>
+                </RequireGestor>
+              </header>
+
+              <section className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 space-y-3">
+                <div className="text-gray-300">
+                  <span className="font-medium text-white">Deadline:</span> {projectQ.data.deadline ?? "-"}
+                </div>
+                {projectQ.data.description && (
+                  <div className="text-gray-300">
+                    <span className="font-medium text-white">Descrição:</span> {projectQ.data.description}
+                  </div>
+                )}
+                <div className="text-gray-300">
+                  <span className="font-medium text-white">Tecnologias:</span>{" "}
+                  {projectQ.data.technologies?.length ? (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {projectQ.data.technologies.map((tech: string, index: number) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-md text-xs backdrop-blur-sm"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    "-"
                   )}
                 </div>
-              </RequireGestor>
-            </section>
-          </>
-        )}
-      </main>
-    </Guard>
-  );
+                {projectQ.data.status !== "ACTIVE" && projectQ.data.completedAt && (
+                  <div className="text-xs text-gray-500 pt-2 border-t border-white/10">
+                    Atualizado: {new Date(projectQ.data.completedAt).toLocaleString()}
+                  </div>
+                )}
+              </section>
+
+              <section className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 space-y-4">
+                <h2 className="text-lg font-medium text-white">Membros</h2>
+                {projectQ.data.members?.length ? (
+                  <div className="space-y-3">
+                    {projectQ.data.members.map((m: Member) => (
+                      <div
+                        key={m.id}
+                        className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg p-3 hover:bg-white/10 transition-colors duration-200"
+                      >
+                        <div className="text-gray-300">
+                          <span className="text-white font-medium">{m.name}</span>
+                          <span className="mx-2">—</span>
+                          <span
+                            className={`px-2 py-1 rounded text-xs ${
+                              m.role === "GESTOR"
+                                ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
+                                : "bg-gray-500/20 text-gray-400 border border-gray-500/30"
+                            }`}
+                          >
+                            {m.role}
+                          </span>
+                          <span className="ml-2 text-sm">({m.areas.join(", ")})</span>
+                        </div>
+                        <RequireGestor>
+                          <button
+                            className="text-red-400 hover:text-red-300 underline transition-colors duration-200"
+                            onClick={() => removeMember(m.id)}
+                          >
+                            remover
+                          </button>
+                        </RequireGestor>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400">Sem membros.</p>
+                )}
+
+                <RequireGestor>
+                  <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-3">
+                    <div className="font-medium text-white">Adicionar membro</div>
+                    <div className="flex gap-3">
+                      <select
+                        className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                        value={newMember}
+                        onChange={(e) => setNewMember(e.target.value)}
+                        disabled={collabsQ.isLoading}
+                      >
+                        <option value="" className="bg-gray-800">
+                          -- selecione --
+                        </option>
+                        {collabsQ.data?.map((c: { id: string; name: string }) => (
+                          <option key={c.id} value={c.id} className="bg-gray-800">
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg transition-all duration-200 font-medium backdrop-blur-sm"
+                        onClick={addMember}
+                      >
+                        Adicionar
+                      </button>
+                    </div>
+                    {collabsQ.isError && <p className="text-sm text-red-400">Erro ao carregar lista de colaboradores.</p>}
+                  </div>
+                </RequireGestor>
+              </section>
+            </>
+          )}
+        </main>
+      </Guard>
+    </div>
+  )
 }
