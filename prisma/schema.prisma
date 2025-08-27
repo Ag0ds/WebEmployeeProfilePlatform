@@ -37,12 +37,20 @@ model CollaboratorArea {
   @@id([collaboratorId, areaId])
 }
 
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
 model Project {
-  id           String          @id @default(cuid())
+  id           String          @id @default(uuid())
   name         String
   deadline     DateTime?
   description  String?
-  technologies String[]        // string[]
+  technologies String[]
+  status       ProjectStatus   @default(ACTIVE)
+  completedAt  DateTime?
   members      ProjectMember[]
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
@@ -51,8 +59,9 @@ model Project {
 model ProjectMember {
   collaboratorId String
   projectId      String
-  collaborator   Collaborator @relation(fields: [collaboratorId], references: [id])
-  project        Project      @relation(fields: [projectId], references: [id])
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  collaborator Collaborator @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
+
 
   @@id([collaboratorId, projectId])
 }

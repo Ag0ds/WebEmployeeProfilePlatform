@@ -12,6 +12,7 @@ import {
 import { projectsService } from "./service";
 import { ListProjectsSchema } from "./schemas";
 
+
 export const projectsRouter = Router();
 
 projectsRouter.get("/", validate(ListProjectsSchema), async (req, res, next) => {
@@ -29,7 +30,6 @@ projectsRouter.get("/:id", validate(IdParamSchema), async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// Mutations: apenas GESTOR
 projectsRouter.post("/", auth, rbac("GESTOR"), validate(CreateProjectSchema), async (req, res, next) => {
   try {
     const created = await projectsService.create(req.body);
@@ -55,5 +55,33 @@ projectsRouter.delete("/:id/members/:collaboratorId", auth, rbac("GESTOR"), vali
   try {
     const p = await projectsService.removeMember(req.params.id!, req.params.collaboratorId!);
     res.json(p);
+  } catch (err) { next(err); }
+});
+
+projectsRouter.post("/:id/complete", auth, rbac("GESTOR"), validate(IdParamSchema), async (req, res, next) => {
+  try {
+    const p = await projectsService.complete(req.params.id!);
+    res.json(p);
+  } catch (err) { next(err); }
+});
+
+projectsRouter.post("/:id/cancel", auth, rbac("GESTOR"), validate(IdParamSchema), async (req, res, next) => {
+  try {
+    const p = await projectsService.cancel(req.params.id!);
+    res.json(p);
+  } catch (err) { next(err); }
+});
+
+projectsRouter.post("/:id/reopen", auth, rbac("GESTOR"), validate(IdParamSchema), async (req, res, next) => {
+  try {
+    const p = await projectsService.reopen(req.params.id!);
+    res.json(p);
+  } catch (err) { next(err); }
+});
+
+projectsRouter.delete("/:id", auth, rbac("GESTOR"), validate(IdParamSchema), async (req, res, next) => {
+  try {
+    await projectsService.removeproject(req.params.id!);
+    res.status(204).send();
   } catch (err) { next(err); }
 });

@@ -15,3 +15,10 @@ export const LoginSchema = z.object({
     password: z.string().min(6),
   }),
 });
+
+export const ChangePasswordSchema = z.object({
+  body: z.object({
+    currentPassword: z.string().min(6),
+    newPassword: z.string().min(6),
+  }),
+});

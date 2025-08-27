@@ -64,13 +64,37 @@ export const projectsService = {
 
   async removeMember(id: string, collaboratorId: string) {
     await projectsRepository.removeMember(id, collaboratorId);
-    const areas = await projectsRepository.getMembersAreasByProject(id);
-    if (!hasMinComposition(areas) && areas.length) {
-      await projectsRepository.addMember(id, collaboratorId);
-      throw Object.assign(new Error("Project must include at least one of each: GESTAO, BACKEND, FRONTEND"), { statusCode: 400 });
-    }
+
     const p = await projectsRepository.findById(id);
+    if (!p) throw Object.assign(new Error("Not found"), { statusCode: 404 });
+
+    if (p.status === "ACTIVE") {
+      const areas = await projectsRepository.getMembersAreasByProject(id);
+      if (!hasMinComposition(areas) && areas.length) {
+        await projectsRepository.addMember(id, collaboratorId);
+        throw Object.assign(new Error("Project must include at least one of each: GESTAO, BACKEND, FRONTEND"), { statusCode: 400 });
+      }
+    }
     return serializeProject(p as any);
+  },
+
+  async complete(id: string) {
+      const p = await projectsRepository.setStatus(id, "COMPLETED");
+      return serializeProject(p as any);
+    },
+  async cancel(id: string) {
+      const p = await projectsRepository.setStatus(id, "CANCELLED");
+      return serializeProject(p as any);
+    },
+  async reopen(id: string) {
+      const p = await projectsRepository.setStatus(id, "ACTIVE");
+      return serializeProject(p as any);
+    },
+
+  async removeproject(id: string) {
+
+    await projectsRepository.delete(id);
+    return;
   },
 
   async remove(id: string) {

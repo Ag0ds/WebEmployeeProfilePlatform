@@ -3,6 +3,7 @@ import { env } from "../../config/env";
 import { collaboratorsRepository } from "./repository";
 import { serializeFor, serializeManyFor } from "./mappers/serializer";
 
+
 type Role = "NORMAL" | "GESTOR";
 type AreaName = "FRONTEND"|"BACKEND"|"INFRA"|"DESIGN"|"REQUISITOS"|"GESTAO";
 
@@ -67,15 +68,33 @@ export const collaboratorsService = {
     areaNames?: AreaName[];
   }) {
     const patch: any = { ...input };
-    if (input.password) {
-      patch.passwordHash = await bcrypt.hash(input.password, env.BCRYPT_ROUNDS);
-      delete patch.password;
-    }
-    const updated = await collaboratorsRepository.update(id, patch);
-    return serializeFor("GESTOR", updated as any);
-  },
+     if (Object.prototype.hasOwnProperty.call(input, "role") && input.role === "NORMAL") {
+        const cur = await collaboratorsRepository.getRoleById(id);
+        if (cur?.role === "GESTOR") {
+          const totalGestores = await collaboratorsRepository.countByRole("GESTOR");
+          if (totalGestores <= 1) {
+            throw Object.assign(new Error("Não é possível remover o último GESTOR."), { statusCode: 400 });
+          }
+        }
+      }
+
+      if (input.password) {
+        patch.passwordHash = await bcrypt.hash(input.password, env.BCRYPT_ROUNDS);
+        delete patch.password;
+      }
+
+      const updated = await collaboratorsRepository.update(id, patch);
+      return serializeFor("GESTOR", updated as any);
+    },
 
   async remove(id: string) {
+    const cur = await collaboratorsRepository.getRoleById(id);
+    if (cur?.role === "GESTOR") {
+      const totalGestores = await collaboratorsRepository.countByRole("GESTOR");
+      if (totalGestores <= 1) {
+        throw Object.assign(new Error("Não é possível deletar o último GESTOR."), { statusCode: 400 });
+      }
+    }
     await collaboratorsRepository.delete(id);
   },
 };

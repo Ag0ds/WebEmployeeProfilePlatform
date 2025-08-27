@@ -15,7 +15,6 @@ const baseSelect = {
 
 export const collaboratorsRepository = {
   listPaged: (page: number | string, perPage: number | string, q?: string) => {
-  // força números válidos mesmo se vierem strings
   const pNum = Number(page);
   const ppNum = Number(perPage);
   const pageN = Number.isNaN(pNum) ? 1 : Math.max(1, Math.floor(pNum));
@@ -35,7 +34,7 @@ export const collaboratorsRepository = {
 
   return prisma.$transaction(async (tx) => {
     const countArgs: Prisma.CollaboratorCountArgs = {};
-    if (where) countArgs.where = where; // não envia where: undefined
+    if (where) countArgs.where = where;
 
     const findArgs: Prisma.CollaboratorFindManyArgs = {
       select: baseSelect,
@@ -179,4 +178,13 @@ export const collaboratorsRepository = {
     await tx.collaboratorArea.deleteMany({ where: { collaboratorId: id } });
     return tx.collaborator.delete({ where: { id } });
   }),
+  
+  countByRole: (role: "NORMAL" | "GESTOR") =>
+  prisma.collaborator.count({ where: { role } }),
+
+  getRoleById: (id: string) =>
+    prisma.collaborator.findUnique({
+      where: { id },
+      select: { role: true },
+    }),
 };

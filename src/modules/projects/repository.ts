@@ -1,4 +1,3 @@
-// src/modules/projects/repository.ts
 import { prisma } from "../../config/prisma";
 import type { Prisma } from "../../generated/prisma";
 
@@ -8,6 +7,8 @@ export const projectSelect = {
   deadline: true,
   description: true,
   technologies: true,
+  status: true,
+  completedAt: true,
   createdAt: true,
   updatedAt: true,
   members: {
@@ -159,6 +160,22 @@ export const projectsRepository = {
     });
     return rows.flatMap((r) => r.areas.map((a) => a.area.name));
   },
+
+  setStatus: (id: string, status: "ACTIVE" | "COMPLETED" | "CANCELLED") =>
+    prisma.project.update({
+      where: { id },
+      data: {
+        status,
+        completedAt: status === "COMPLETED" ? new Date() : null,
+      },
+      select: projectSelect,
+    }),
+
+  delete: (id: string) =>
+    prisma.$transaction(async (tx) => {
+      await tx.projectMember.deleteMany({ where: { projectId: id } });
+      return tx.project.delete({ where: { id } });
+    }),
 };
 
 export const getProjectsByCollaborator = async (collaboratorId: string) => {
