@@ -1,5 +1,10 @@
 import { projectsRepository } from "./repository";
 import { serializeManyProjects, serializeProject } from "./mappers/serializer";
+import {
+  getProjectsByCollaborator,
+  getMembersAreasByProjectExcept,
+} from "../projects/repository";
+import { collaboratorsRepository } from "../collaborators/repository";
 
 function hasMinComposition(areaNames: string[]) {
   const set = new Set(areaNames);
@@ -53,10 +58,6 @@ export const projectsService = {
   async addMember(id: string, collaboratorId: string) {
     await projectsRepository.addMember(id, collaboratorId);
     const areas = await projectsRepository.getMembersAreasByProject(id);
-    if (!hasMinComposition(areas)) {
-      await projectsRepository.removeMember(id, collaboratorId);
-      throw Object.assign(new Error("Project must include at least one of each: GESTAO, BACKEND, FRONTEND"), { statusCode: 400 });
-    }
     const p = await projectsRepository.findById(id);
     return serializeProject(p as any);
   },
@@ -71,4 +72,29 @@ export const projectsService = {
     const p = await projectsRepository.findById(id);
     return serializeProject(p as any);
   },
+
+  async remove(id: string) {
+    const projects = await getProjectsByCollaborator(id);
+    if (projects.length) {
+      const broken: string[] = [];
+      for (const p of projects) {
+        const areasAfter = await getMembersAreasByProjectExcept(p.id, id);
+        if (!hasMinComposition(areasAfter) && areasAfter.length > 0) {
+          broken.push(p.name);
+        }
+      }
+      if (broken.length) {
+        throw Object.assign(
+          new Error(
+            `Não é possível excluir: os projetos a seguir ficariam inválidos (faltaria GESTAO/BACKEND/FRONTEND): ${broken.join(
+              ", "
+            )}`
+          ),
+          { statusCode: 400 }
+        );
+      }
+    }
+
+    await collaboratorsRepository.delete(id);
+  }
 };

@@ -173,5 +173,10 @@ export const collaboratorsRepository = {
     });
   },
 
-  delete: (id: string) => prisma.collaborator.delete({ where: { id } }),
+  delete: (id: string) =>
+  prisma.$transaction(async (tx) => {
+    await tx.projectMember.deleteMany({ where: { collaboratorId: id } });
+    await tx.collaboratorArea.deleteMany({ where: { collaboratorId: id } });
+    return tx.collaborator.delete({ where: { id } });
+  }),
 };

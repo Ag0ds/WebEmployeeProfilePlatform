@@ -75,7 +75,7 @@ export const projectsRepository = {
     const created = await prisma.project.create({
       data: {
         name: data.name,
-        deadline: data.deadline,
+        deadline: data.deadline ?? null,
         description: data.description ?? null,
         technologies: data.technologies ?? [],
       },
@@ -159,4 +159,26 @@ export const projectsRepository = {
     });
     return rows.flatMap((r) => r.areas.map((a) => a.area.name));
   },
+};
+
+export const getProjectsByCollaborator = async (collaboratorId: string) => {
+  const rows = await prisma.projectMember.findMany({
+    where: { collaboratorId },
+    select: { projectId: true, project: { select: { name: true } } },
+  });
+  return rows.map(r => ({ id: r.projectId, name: r.project.name }));
+};
+
+export const getMembersAreasByProjectExcept = async (projectId: string, collaboratorId: string) => {
+  const rows = await prisma.projectMember.findMany({
+    where: { projectId, collaboratorId: { not: collaboratorId } },
+    select: {
+      collaborator: {
+        select: {
+          areas: { select: { area: { select: { name: true } } } },
+        },
+      },
+    },
+  });
+  return rows.flatMap(r => r.collaborator.areas.map(a => a.area.name));
 };
