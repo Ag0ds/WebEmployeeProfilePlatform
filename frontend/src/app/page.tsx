@@ -36,19 +36,6 @@ export default function HomePage() {
 
   return (
     <Guard>
-      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-x-hidden">
-        <header className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between backdrop-blur-md bg-black/20 border-b border-white/10">
-          <h1 className="text-xl font-semibold text-white">
-            Olá, <span className="text-blue-400">{user?.name}</span>
-          </h1>
-          <button
-            className="px-4 py-2 text-sm text-white/80 hover:text-white transition-colors duration-300 border border-white/20 rounded-lg hover:border-blue-400/50 backdrop-blur-sm bg-white/5"
-            onClick={logout}
-          >
-            Sair
-          </button>
-        </header>
-
         <section className="nav-section min-h-screen flex items-center justify-center relative">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-transparent"></div>
           <Link
@@ -143,7 +130,6 @@ export default function HomePage() {
             />
           ))}
         </div>
-      </div>
     </Guard>
   )
 }
