@@ -5,7 +5,7 @@ type CollabWithAreas = {
   name: string;
   email: string;
   age?: number | null;
-  regime?: string | null; // sensível
+  regime?: string | null;
   role: Role;
   createdAt: string | Date;
   updatedAt: string | Date;

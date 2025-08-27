@@ -115,7 +115,7 @@ export const projectsRepository = {
     await prisma.projectMember.create({
       data: { projectId, collaboratorId },
     }).catch((e: any) => {
-      if (e.code === "P2002" || e.code === "P2003") return; // duplicado ou FK inválida
+      if (e.code === "P2002" || e.code === "P2003") return; 
       throw e;
     });
 
@@ -129,7 +129,7 @@ export const projectsRepository = {
     await prisma.projectMember.delete({
       where: { collaboratorId_projectId: { collaboratorId, projectId } as any },
     }).catch((e: any) => {
-      if (e.code === "P2025") return; // não existia
+      if (e.code === "P2025") return;
       throw e;
     });
 
