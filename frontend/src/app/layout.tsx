@@ -7,7 +7,7 @@ import Providers from "./providers"
 import Header from "../components/Header"
 
 export const metadata: Metadata = {
-  title: "Employee Platform",
+  title: "Plataforma de Perfil de Funcionários",
   description: "Raw UI",
   generator: "v0.app",
 }
