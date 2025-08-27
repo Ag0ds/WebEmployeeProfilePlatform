@@ -37,7 +37,6 @@ export default function HomePage() {
   return (
     <Guard>
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-x-hidden">
-        {/* Header fixo */}
         <header className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between backdrop-blur-md bg-black/20 border-b border-white/10">
           <h1 className="text-xl font-semibold text-white">
             Olá, <span className="text-blue-400">{user?.name}</span>
@@ -50,7 +49,6 @@ export default function HomePage() {
           </button>
         </header>
 
-        {/* Seção 1 - Áreas */}
         <section className="nav-section min-h-screen flex items-center justify-center relative">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-transparent"></div>
           <Link
@@ -78,7 +76,6 @@ export default function HomePage() {
           </Link>
         </section>
 
-        {/* Seção 2 - Colaboradores */}
         <section className="nav-section min-h-screen flex items-center justify-center relative">
           <div className="absolute inset-0 bg-gradient-to-bl from-purple-900/20 to-transparent"></div>
           <Link
@@ -106,7 +103,6 @@ export default function HomePage() {
           </Link>
         </section>
 
-        {/* Seção 3 - Projetos */}
         <section className="nav-section min-h-screen flex items-center justify-center relative">
           <div className="absolute inset-0 bg-gradient-to-tr from-green-900/20 to-transparent"></div>
           <Link
@@ -134,7 +130,6 @@ export default function HomePage() {
           </Link>
         </section>
 
-        {/* Indicador de scroll */}
         <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-50 space-y-3">
           {[0, 1, 2].map((index) => (
             <button
