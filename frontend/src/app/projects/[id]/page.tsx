@@ -49,11 +49,15 @@ export default function ProjectDetailPage() {
   });
 
   const addMember = async () => {
-    if (!newMember) return;
+  if (!newMember) return;
+  try {
     await api.post(`/projects/${id}/members`, { collaboratorId: newMember });
     setNewMember("");
     await projectQ.refetch();
-  };
+  } catch (e: any) {
+    alert(e?.response?.data?.message ?? "Erro ao adicionar membro");
+  }
+};
 
   const removeMember = async (memberId: string) => {
     if (!confirm("Remover este membro do projeto?")) return;

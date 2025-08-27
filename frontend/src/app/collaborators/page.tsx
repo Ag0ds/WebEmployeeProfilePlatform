@@ -71,8 +71,12 @@ export default function CollaboratorsPage() {
                         className="text-red-600 underline"
                         onClick={async () => {
                             if (!confirm("Excluir colaborador?")) return;
-                            await api.delete(`/collaborators/${c.id}`);
-                            query.refetch();
+                            try {
+                              await api.delete(`/collaborators/${c.id}`);
+                              query.refetch();
+                            } catch (e: any) {
+                              alert(e?.response?.data?.message ?? "Erro ao excluir");
+                            }
                         }}
                         >
                         Excluir
