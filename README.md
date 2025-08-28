@@ -85,39 +85,63 @@
 </code></pre>
 </li>
 <li>
+<p><strong>Crie um arquivo .env:</strong></p>
+<pre><code class="language-sh"# API>
+PORT=3000
+CORS_ORIGIN=http://localhost:3001
+JWT_SECRET=troque-jwt
+BCRYPT_ROUNDS=10
+DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/psd_colab?schema=public
+</code></pre>
+</li>
+<li>
 <p><strong>Instale as dependências:</strong></p>
 </li>
 </ol>
 
 <p><strong>Usando <a href="https://www.docker.com/">docker</a>:</strong></p>
-<pre><code class="language-sh">docker build -t Ag0ds/WebEmployeeProfilePlatform .
+<pre><code class="language-sh">docker compose up -d db
 </code></pre>
 
 <p><strong>Usando <a href="https://www.npmjs.com/">npm</a>:</strong></p>
 <pre><code class="language-sh">npm install
+npx prisma migrate dev
+npx prisma generate
+npm run seed
+</code></pre>
+
+<p><strong>Frontend (Next.js)</p>
+<pre><code class="language-sh">cd frontend
+npm install
+echo "NEXT_PUBLIC_API_URL=http://localhost:3000" > .env.local
+npm pkg set scripts.dev="next dev -p 3001"
 </code></pre>
 
 <h3 id="uso">Uso</h3>
 <p>Execute o projeto com:</p>
 
-<p><strong>Usando <a href="https://www.docker.com/">docker</a>:</strong></p>
-<pre><code class="language-sh">docker run -it {nome_da_imagem}
+<p><strong>Backend (API)</strong></p>
+<pre><code class="language-sh">npm run dev
 </code></pre>
 
-<p><strong>Usando <a href="https://www.npmjs.com/">npm</a>:</strong></p>
-<pre><code class="language-sh">npm start
+<p><strong>Front (Next)</strong></p>
+<pre><code class="language-sh">cd frontend
+npm run dev
+</code></pre>
+
+<p><strong>Usando <a href="https://www.docker.com/">docker</a>:</strong></p>
+<pre><code class="language-sh">DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/psd_colab?schema=public
+docker build -t webemployee-api .
+docker run --name webemployee-api --env-file .env -p 3000:3000 -d webemployee-api
 </code></pre>
 
 <h3 id="testes">Testes</h3>
-<p>O WebEmployeeProfilePlatform utiliza o framework de testes <strong>{nome_framework}</strong>. Execute a suíte de testes com:</p>
 
-<p><strong>Usando <a href="https://www.docker.com/">docker</a>:</strong></p>
-<pre><code class="language-sh">echo 'INSERIR-COMANDO-DE-TESTE-AQUI'
+<p><strong>Login (PowerShell)</strong></p>
+<pre><code class="language-sh">$body = '{"email":"gestor@empresa.com","password":"admin123"}'
+Invoke-RestMethod -Method Post -Uri http://localhost:3000/auth/login -ContentType 'application/json' -Body $body
 </code></pre>
 
-<p><strong>Usando <a href="https://www.npmjs.com/">npm</a>:</strong></p>
-<pre><code class="language-sh">npm test
-</code></pre>
 
 <hr>
 <div align="left"><a href="#top">⬆ Voltar ao topo</a></div>
